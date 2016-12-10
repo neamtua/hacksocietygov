@@ -27,4 +27,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('institutions/{id}/edit', 'InstitutionsController@edit');
     Route::post('institutions/{id}/edit', 'InstitutionsController@update');
     Route::delete('institutions/{id}', 'InstitutionsController@delete');
+
+    Route::get('datasets', 'DatasetsController@index');
+    Route::post('datasets/ajax', 'DatasetsController@ajax');
+    Route::get('datasets/create', 'DatasetsController@create');
+    Route::post('datasets/create', 'DatasetsController@add');
+    Route::get('datasets/{id}/edit', 'DatasetsController@edit');
+    Route::post('datasets/{id}/edit', 'DatasetsController@update');
+    Route::delete('datasets/{id}', 'DatasetsController@delete');
 });
