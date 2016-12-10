@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Institution extends Model
 {
-    protected $table = 'institution';
+    protected $table = 'institutions';
     protected $guarded = ['id'];
     public $timestamps = true;
 

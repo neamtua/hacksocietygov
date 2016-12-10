@@ -12,6 +12,7 @@
 
     <!-- Styles -->
     <link href="/css/app.css" rel="stylesheet">
+    <link href="{{ asset('css/datatables.css') }}" rel="stylesheet">
 
     <!-- Scripts -->
     <script>
@@ -53,6 +54,9 @@
                             <li><a href="{{ url('/login') }}">Login</a></li>
                             <li><a href="{{ url('/register') }}">Register</a></li>
                         @else
+                            <li><a href="{{ url('/institutions') }}">Institutii</a></li>
+                            <li><a href="{{ url('/datasets') }}">Seturi de date</a></li>
+                            <li><a href="{{ url('/apikeys') }}">Chei API</a></li>
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                                     {{ Auth::user()->name }} <span class="caret"></span>
@@ -81,7 +85,29 @@
         @yield('content')
     </div>
 
-    <!-- Scripts -->
-    <script src="/js/app.js"></script>
+    @section('js')
+        <!-- Scripts -->
+        <script src="/js/app.js"></script>
+        <script src="{{ asset('js/datatables/datatables.min.js') }}"></script>
+        <script src="{{ asset('js/datatables/fnReloadAjax.js') }}"></script>
+        <script src="https://use.fontawesome.com/2fd9609d2b.js"></script>
+        <script type="text/javascript">
+            $(document).on('click', 'a.js-delete', function (event) {
+                event.preventDefault();
+
+                if (!confirm('Esti sigur ca vrei sa stergi aceasta inregistrare?')) {
+                    return;
+                }
+
+                $.ajax({
+                    type: 'delete',
+                    url: $(this).attr('href'),
+                    success: function(results) {
+                        $('#dt_table').DataTable().ajax.reload(null, false);
+                    }
+                });
+            });
+        </script>
+    @show
 </body>
 </html>

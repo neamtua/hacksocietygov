@@ -18,3 +18,13 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index');
+
+Route::group(['middleware' => 'auth'], function () {
+    Route::get('institutions', 'InstitutionsController@index');
+    Route::post('institutions/ajax', 'InstitutionsController@ajax');
+    Route::get('institutions/create', 'InstitutionsController@create');
+    Route::post('institutions/create', 'InstitutionsController@add');
+    Route::get('institutions/{id}/edit', 'InstitutionsController@edit');
+    Route::post('institutions/{id}/edit', 'InstitutionsController@update');
+    Route::delete('institutions/{id}', 'InstitutionsController@delete');
+});
