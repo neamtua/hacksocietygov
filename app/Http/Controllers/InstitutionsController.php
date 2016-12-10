@@ -71,6 +71,10 @@ class InstitutionsController extends Controller
 
     public function delete($id)
     {
+        if (!auth()->user()->can('delete-institutions')) {
+            abort('403');
+        }
+
         $institution = Institution::findOrFail($id);
         $institution->datasets()->delete();
         $institution->delete();
