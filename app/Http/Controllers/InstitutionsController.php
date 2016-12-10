@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\InstitutionsRequest;
 use App\Institution;
 use Illuminate\Http\Request;
+use DB;
 
 class InstitutionsController extends Controller
 {
@@ -76,7 +77,15 @@ class InstitutionsController extends Controller
         }
 
         $institution = Institution::findOrFail($id);
-        $institution->datasets()->delete();
+        $datasets = $institution->datasets()->get();
+        if (count($datasets)) {
+            foreach ($datasets as $dataset) {
+                if (!empty($dataset->table_name)) {
+                    DB::statement('DROP TABLE '.$dataset->table_name);
+                }
+                $dataset->delete();
+            }
+        }
         $institution->delete();
     }
 
