@@ -34,5 +34,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('datasets/create', 'DatasetsController@add');
     Route::get('datasets/{id}/edit', 'DatasetsController@edit');
     Route::post('datasets/{id}/edit', 'DatasetsController@update');
+    Route::get('datasets/{id}/view', 'DatasetsController@view');
+    Route::post('datasets/{id}/ajax', 'DatasetsController@viewAjax');
     Route::delete('datasets/{id}', 'DatasetsController@delete');
 });

@@ -102,6 +102,20 @@ class DatasetsController extends Controller
         return redirect()->back()->with('message', 'Setul de date a fost modificat');
     }
 
+    public function view($id)
+    {
+        if (!auth()->user()->can('read-datasets')) {
+            abort('403');
+        }
+
+        $dataset = Dataset::findOrFail($id);
+        $columns = Libraries\DatasetHelper::getColumns($dataset->table_name);
+
+        return view('front.datasets.view')
+            ->with('dataset', $dataset)
+            ->with('columns', $columns);
+    }
+
     public function delete($id)
     {
         if (!auth()->user()->can('delete-datasets')) {
@@ -166,6 +180,78 @@ class DatasetsController extends Controller
                 <a href="'.url('datasets/'.$row->id.'/edit').'" class="btn btn-xs btn-warning"><i class="fa fa-pencil-square-o"></i> Modifica</a>
                 <a href="'.url('datasets/'.$row->id).'" class="btn btn-xs btn-danger js-delete"><i class="fa fa-trash"></i> Sterge</a>'
             ];
+        }
+
+        return json_encode([
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $datasets
+        ]);
+    }
+
+    public function viewAjax(Request $request, $id)
+    {
+        if (!auth()->user()->can('read-datasets')) {
+            abort('403');
+        }
+
+        $dataset = Dataset::findOrFail($id);
+        $columns = Libraries\DatasetHelper::getColumns($dataset->table_name);
+        $columnList = [];
+        if (count($columns)) {
+            foreach ($columns as $column) {
+                $columnList[] = $column->Field;
+            }
+        }
+
+        $input = $request->all();
+
+        $length = $input['length']?$input['length']:10;
+        $draw = $input['draw']?$input['draw']:1;
+        $start = $input['start']?$input['start']:0;
+        $recordsTotal = DB::table($dataset->table_name)->count();
+        $search = $input['search']['value']?$input['search']['value']:'';
+
+        $columns = $columnList;
+
+        $datasets = [];
+
+        $datasetsSql = DB::table($dataset->table_name)->whereRaw('1=1');
+
+        if (!empty($search) && count($columnList)) {
+            foreach ($columnList as $column) {
+                if (isset($notFirst)) {
+                    $datasetsSql->orWhere($column, 'LIKE', '%'.$search.'%');
+                } else {
+                    $datasetsSql->where($column, 'LIKE', '%'.$search.'%');
+                    $notFirst = true;
+                }
+            }
+        }
+
+        $recordsFiltered = $datasetsSql->count();
+
+        if ($length >= 0) {
+            $datasetsSql = $datasetsSql->orderBy(
+                $columns[$input['order'][0]['column']],
+                $input['order'][0]['dir']
+            )->take($length)->skip($start)->get();
+        } else {
+            $datasetsSql = $datasetsSql->orderBy(
+                $columns[$input['order'][0]['column']],
+                $input['order'][0]['dir']
+            )->get();
+        }
+
+        foreach ($datasetsSql as $row) {
+            $rowValues = [];
+            if (count($columnList)) {
+                foreach ($columnList as $column) {
+                    $rowValues[] = $row->{$column};
+                }
+            }
+            $datasets[] = $rowValues;
         }
 
         return json_encode([
